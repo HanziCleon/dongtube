@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dongtube API</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .welcome {
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .header {
+      margin-bottom: 20px;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .main-title {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #000;
+      letter-spacing: -0.5px;
+    }
+
+    .version-badge {
+      background: #000;
+      color: #fff;
+      padding: 4px 12px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: #666;
+      line-height: 1.5;
+      margin-bottom: 15px;
+    }
+
+    .links {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .link-item {
+      color: #000;
+      text-decoration: underline;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .link-item:hover {
+      color: #666;
+    }
+
+    .stats-box {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      padding: 12px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .stat-number {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #000;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: #666;
+      font-weight: 500;
+    }
+
+    .search-box {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      padding: 12px 18px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .search-icon {
+      color: #999;
+      font-size: 1rem;
+    }
+
+    .search-box input {
+      flex: 1;
+      border: none;
+      font-size: 0.9rem;
+      outline: none;
+      background: transparent;
+      color: #333;
+    }
+
+    .search-box input::placeholder {
+      color: #bbb;
+    }
+
+    .endpoint-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+
+    .endpoint-item {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .endpoint-item:hover {
+      border-color: #ccc;
+    }
+
+    .endpoint-item.active {
+      border-color: #000;
+    }
+
+    .endpoint-header {
+      padding: 15px 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .method-badge {
+      padding: 4px 10px;
+      border: 1px solid #000;
+      font-weight: 800;
+      font-size: 0.7rem;
+      letter-spacing: 0.3px;
+      background: #fff;
+      color: #000;
+      flex-shrink: 0;
+    }
+
+    .endpoint-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .endpoint-path {
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      color: #000;
+      font-weight: 600;
+      margin-bottom: 4px;
+      word-break: break-all;
+    }
+
+    .endpoint-desc-text {
+      font-size: 0.75rem;
+      color: #888;
+    }
+
+    .collapse-icon {
+      font-size: 1rem;
+      color: #666;
+      font-weight: 700;
+      transition: transform 0.3s;
+      flex-shrink: 0;
+    }
+
+    .endpoint-item.active .collapse-icon {
+      transform: rotate(180deg);
+    }
+
+    .endpoint-details {
+      display: none;
+      border-top: 1px solid #e0e0e0;
+      background: #fafafa;
+    }
+
+    .endpoint-details.show {
+      display: block;
+    }
+
+    .details-content {
+      padding: 20px;
+    }
+
+    .try-section-title {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #000;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .param-group {
+      margin-bottom: 15px;
+    }
+
+    .param-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #000;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .required-mark {
+      color: #dc3545;
+    }
+
+    .param-hint {
+      font-size: 0.75rem;
+      color: #999;
+      margin-bottom: 6px;
+    }
+
+    .param-input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      font-size: 0.85rem;
+      background: #fff;
+      font-family: 'Courier New', monospace;
+      transition: border-color 0.2s;
+    }
+
+    .param-input:focus {
+      outline: none;
+      border-color: #000;
+      background: #fff;
+    }
+
+    .execute-btn {
+      background: #000;
+      color: #fff;
+      border: none;
+      padding: 12px 25px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+
+    .execute-btn:hover {
+      background: #333;
+    }
+
+    .execute-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .http-codes-section {
+      margin-top: 25px;
+      border-top: 1px solid #e0e0e0;
+      padding-top: 15px;
+    }
+
+    .codes-title {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #000;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 12px;
+    }
+
+    .code-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .code-table th {
+      text-align: left;
+      padding: 10px;
+      background: #f5f5f5;
+      border: 1px solid #e0e0e0;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .code-table td {
+      padding: 10px;
+      border: 1px solid #e0e0e0;
+      font-size: 0.8rem;
+    }
+
+    .status-code {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+    }
+
+    .status-icon {
+      font-size: 0.9rem;
+    }
+
+    .status-icon.success { color: #28a745; }
+    .status-icon.error { color: #dc3545; }
+
+    .result-section {
+      margin-top: 15px;
+      display: none;
+    }
+
+    .result-section.show {
+      display: block;
+    }
+
+    .result-header {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #000;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 12px;
+    }
+
+    .result-box {
+      background: #1e2a3a;
+      color: #fff;
+      padding: 15px;
+      max-height: 400px;
+      overflow: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+    }
+
+    .result-info {
+      margin-bottom: 12px;
+      line-height: 1.6;
+    }
+
+    .result-box img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin-top: 12px;
+      border: 2px solid #fff;
+    }
+
+    .result-box video {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin-top: 12px;
+    }
+
+    .result-box pre {
+      margin: 0;
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #fff;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 25px 15px;
+      color: #999;
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 30px;
+      color: #666;
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #000;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 50px 20px;
+      color: #999;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="welcome">Hi Visitor! Welcome To</div>
+    
+    <div class="header">
+      <div class="title-row">
+        <h1 class="main-title">Dongtube APIs.</h1>
+        <span class="version-badge">v2.0</span>
+      </div>
+      <p class="subtitle">This interactive interface allows you to explore and test our comprehensive collection of API endpoints in real-time.</p>
+      <div class="links">
+        <a class="link-item" href="#" onclick="alert('WhatsApp channel coming soon!'); return false;">WhatsApp Information Channel.</a>
+        <a class="link-item" href="#" onclick="alert('Contact admin feature coming soon!'); return false;">Contact Admin.</a>
+      </div>
+    </div>
+
+    <div class="stats-box">
+      <div class="stat-number" id="totalEndpoints">0</div>
+      <div class="stat-label">Total Endpoints Available</div>
+    </div>
+
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Search endpoints...">
+    </div>
+
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <p><strong>Loading endpoints...</strong></p>
+    </div>
+
+    <div id="endpointList" class="endpoint-list"></div>
+
+    <div class="footer">
+      Thx To All Users And Contributors.<br>
+      © Dongtube APIs. | All Rights Reserved.
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin;
+    let allEndpoints = [];
+
+    async function loadEndpoints() {
+      try {
+        const response = await fetch(`${API_BASE}/api/docs`);
+        const data = await response.json();
+        
+        if (data.success) {
+          allEndpoints = data.endpoints;
+          renderEndpoints(allEndpoints);
+          updateStats();
+        }
+      } catch (error) {
+        console.error('Error loading endpoints:', error);
+        document.getElementById('loading').innerHTML = '<p style="color: #dc3545;">Failed to load endpoints. Please refresh the page.</p>';
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+
+    function updateStats() {
+      document.getElementById('totalEndpoints').textContent = allEndpoints.length;
+    }
+
+    function renderEndpoints(endpoints) {
+      const list = document.getElementById('endpointList');
+      
+      if (endpoints.length === 0) {
+        list.innerHTML = '<div class="no-results">No endpoints found</div>';
+        return;
+      }
+
+      list.innerHTML = endpoints.map(ep => {
+        const hasParams = ep.params && ep.params.length > 0;
+        const endpointId = `ep-${ep.path.replace(/\//g, '-').replace(/:/g, '')}`;
+        
+        return `
+          <div class="endpoint-item" id="${endpointId}">
+            <div class="endpoint-header" onclick="toggleEndpoint('${endpointId}')">
+              <div class="method-badge">${ep.method || 'GET'}</div>
+              <div class="endpoint-content">
+                <div class="endpoint-path">${ep.path}</div>
+                <div class="endpoint-desc-text">${ep.description || ep.name}</div>
+              </div>
+              <div class="collapse-icon">▼</div>
+            </div>
+            <div class="endpoint-details" id="details-${endpointId}">
+              <div class="details-content">
+                <div class="try-section-title">▶ TRY IT OUT</div>
+                
+                ${hasParams ? ep.params.map(p => `
+                  <div class="param-group">
+                    <label class="param-label">
+                      ${p.name} ${p.required ? '<span class="required-mark">*</span>' : ''}
+                    </label>
+                    <div class="param-hint">${p.description || 'Input ' + p.name}</div>
+                    <input type="text" class="param-input" data-param="${p.name}" 
+                           placeholder="${p.placeholder || p.description || p.name}">
+                  </div>
+                `).join('') : '<p style="font-size: 0.8rem; color: #666; margin-bottom: 10px;">No parameters required</p>'}
+                
+                <button class="execute-btn" onclick="executeEndpoint('${ep.path}', '${ep.method}', '${endpointId}', ${ep.responseBinary})">
+                  Execute
+                </button>
+                
+                <div class="result-section" id="result-${endpointId}">
+                  <div class="result-header">Response:</div>
+                  <div class="result-box" id="result-content-${endpointId}"></div>
+                </div>
+                
+                <div class="http-codes-section">
+                  <div class="codes-title">≡ HTTP STATUS CODES</div>
+                  <table class="code-table">
+                    <thead>
+                      <tr>
+                        <th>Code</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <div class="status-code">
+                            <span class="status-icon success">✓</span>
+                            <span>200</span>
+                          </div>
+                        </td>
+                        <td>OK - Request successful</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <div class="status-code">
+                            <span class="status-icon error">⊗</span>
+                            <span>400</span>
+                          </div>
+                        </td>
+                        <td>Bad Request - Invalid parameters or missing required fields</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <div class="status-code">
+                            <span class="status-icon error">⊗</span>
+                            <span>405</span>
+                          </div>
+                        </td>
+                        <td>Method Not Allowed - HTTP method not supported</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <div class="status-code">
+                            <span class="status-icon error">⊗</span>
+                            <span>500</span>
+                          </div>
+                        </td>
+                        <td>Internal Server Error - Something went wrong</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleEndpoint(id) {
+      const item = document.getElementById(id);
+      const details = document.getElementById(`details-${id}`);
+      
+      if (item.classList.contains('active')) {
+        item.classList.remove('active');
+        details.classList.remove('show');
+      } else {
+        document.querySelectorAll('.endpoint-item').forEach(el => {
+          el.classList.remove('active');
+          const d = el.querySelector('.endpoint-details');
+          if (d) d.classList.remove('show');
+        });
+        
+        item.classList.add('active');
+        details.classList.add('show');
+      }
+    }
+
+    async function executeEndpoint(path, method, endpointId, isBinary) {
+      const resultSection = document.getElementById(`result-${endpointId}`);
+      const resultContent = document.getElementById(`result-content-${endpointId}`);
+      
+      const params = {};
+      document.querySelectorAll(`#details-${endpointId} input[data-param]`).forEach(input => {
+        if (input.value.trim()) {
+          params[input.dataset.param] = input.value.trim();
+        }
+      });
+
+      let url = `${API_BASE}${path}`;
+      
+      // Add cache buster untuk binary responses
+      if (isBinary || path.includes('/random/')) {
+        const separator = url.includes('?') ? '&' : '?';
+        url += `${separator}_t=${Date.now()}`;
+      }
+      
+      if (method === 'GET' && Object.keys(params).length > 0) {
+        const separator = url.includes('?') ? '&' : '?';
+        url += `${separator}${new URLSearchParams(params).toString()}`;
+      }
+
+      resultSection.classList.add('show');
+      resultContent.innerHTML = '<div class="loading"><div class="spinner"></div><p><strong>Loading...</strong></p></div>';
+
+      try {
+        const options = { 
+          method: method, 
+          headers: {},
+          cache: 'no-store' // Disable browser cache
+        };
+        
+        if (method !== 'GET' && Object.keys(params).length > 0) {
+          options.headers['Content-Type'] = 'application/json';
+          options.body = JSON.stringify(params);
+        }
+
+        const response = await fetch(url, options);
+        const contentType = response.headers.get('content-type');
+
+        if (isBinary || (contentType && contentType.includes('image'))) {
+          const blob = await response.blob();
+          const imgUrl = URL.createObjectURL(blob);
+          resultContent.innerHTML = `
+            <div class="result-info">STATUS: ${response.status} ${response.statusText}<br>CONTENT-TYPE: ${contentType}</div>
+            <img src="${imgUrl}" alt="Response Image" onload="URL.revokeObjectURL(this.src)">
+          `;
+        } else if (contentType && contentType.includes('video')) {
+          const blob = await response.blob();
+          const videoUrl = URL.createObjectURL(blob);
+          resultContent.innerHTML = `
+            <div class="result-info">STATUS: ${response.status} ${response.statusText}<br>CONTENT-TYPE: ${contentType}</div>
+            <video controls><source src="${videoUrl}" type="${contentType}"></video>
+          `;
+        } else {
+          const data = await response.json();
+          resultContent.innerHTML = `
+            <div class="result-info">STATUS: ${response.status} ${response.statusText}<br>CONTENT-TYPE: ${contentType || 'application/json'}</div>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          `;
+        }
+      } catch (error) {
+        resultContent.innerHTML = `
+          <div class="result-info">ERROR</div>
+          <pre>${error.message}</pre>
+        `;
+      }
+    }
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      const filtered = allEndpoints.filter(ep => 
+        ep.name.toLowerCase().includes(query) ||
+        ep.path.toLowerCase().includes(query) ||
+        (ep.description && ep.description.toLowerCase().includes(query)) ||
+        (ep.category && ep.category.toLowerCase().includes(query))
+      );
+      renderEndpoints(filtered);
+    });
+
+    loadEndpoints();
+  </script>
+</body>
+</html>
